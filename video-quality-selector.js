@@ -29,7 +29,37 @@
 		res_label : function( res ) {
 			
 			return ( /^\d+$/.test( res ) ) ? res + 'p' : res;
-		}
+		},
+    
+    /**
+		 * Creates a function that allows translating a string based on the player localize()
+		 *
+		 * @param	(object)	player	The player instance to use when translating strings.
+		 *
+		 * @returns	(function)	The function to return a translated version of a string.
+		 */
+    generateLocalize: function (player) {
+      /**
+       * The function built and returned has the following doc:
+       *
+       * @param	(string)	str	The string for which to return a translated version.
+       *
+       * @returns	(string)	The translated string.
+       */
+    
+      return ( (typeof player.localize === 'function')
+        ?
+            // If the player has `.localize()`, generate a function that uses it.
+            
+            function (str) { return player.localize(str); }
+        :
+            // If the player does not have `.localize()`, generate a function
+            // the simply returns the string input.
+            
+            function(str) { return str; }
+      );
+      
+    }
 	};
 	
 	/***********************************************************************************
@@ -139,7 +169,7 @@
 			el : _V_.Component.prototype.createEl( 'li', {
 				
 				className	: 'vjs-menu-title vjs-res-menu-title',
-				innerHTML	: 'Quality'
+				innerHTML	: methods.generateLocalize(player)('Quality')
 			})
 		}));
 		
@@ -182,6 +212,7 @@
 		 * Setup variables, parse settings
 		 *******************************************************************/
 		var player = this,
+			_localize = methods.generateLocalize(player),
 			sources	= player.options().sources,
 			i = sources.length,
 			j,
@@ -367,7 +398,7 @@
 		
 		// Add the resolution selector button
 		resolutionSelector = new _V_.ResolutionSelector( player, {
-			buttonText		: ( current_res || 'Quality' ),
+			buttonText		: _localize( current_res || 'Quality' ),
 			available_res	: available_res
 		});
 		
